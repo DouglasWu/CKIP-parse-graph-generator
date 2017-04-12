@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.18.1/vis.min.css" rel="stylesheet" type="text/css" />
+
+    <style type="text/css">
+        html,body {
+            margin: 0;
+            padding: 0;
+        }
+        .graph-display {
+            width: 99vw;
+            height: 99vh;
+            margin: 0 auto;
+        }
+    </style>
+  </head>
+  <body>
+    
+    <div id="graph" class="graph-display"></div>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.18.1/vis.min.js"></script>
+    <script type="text/javascript" src="parser.js"></script>
+    <script type="text/javascript">
+        var QueryString = function () {
+          // This function is anonymous, is executed immediately and 
+          // the return value is assigned to QueryString!
+          var query_string = {};
+          var query = window.location.search.substring(1);
+          var vars = query.split("&");
+          for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+                // If first entry with this name
+            if (typeof query_string[pair[0]] === "undefined") {
+              query_string[pair[0]] = decodeURIComponent(pair[1]);
+                // If second entry with this name
+            } else if (typeof query_string[pair[0]] === "string") {
+              var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+              query_string[pair[0]] = arr;
+                // If third or later entry with this name
+            } else {
+              query_string[pair[0]].push(decodeURIComponent(pair[1]));
+            }
+          } 
+          return query_string;
+        }();
+
+
+        $(document).ready(generate);
+
+        function generate() {
+            var query = QueryString.tree;
+            if(query=="") {
+                return;
+            }
+            var parser = new Parser(query);
+            parser.parse();
+            var nodes = [],
+                edges = [];
+            findLeaves(parser.tree, nodes);
+            buildEdges(parser.tree, edges);
+            var data = { nodes: nodes, edges: edges };
+            var network = new vis.Network(document.getElementById('graph'), data, {});
+        }
+        
+    </script>
+  </body>
+</html>
