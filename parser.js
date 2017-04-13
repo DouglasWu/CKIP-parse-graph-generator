@@ -49,7 +49,7 @@ Parser.prototype.struct = function() {
 }
 Parser.prototype.node = function() {
   var item = {
-  	id: this.nodeId,
+    id: this.nodeId,
     role: "",
     pos: "",
     nodes: ""
@@ -72,11 +72,11 @@ Parser.prototype.node = function() {
 // Return the node that can represent this subtree
 // in the graph
 function findHead(tree) {
-	let head = tree;
-	if(typeof(tree.nodes)!="string") {
+  let head = tree;
+  if(typeof(tree.nodes)!="string") {
     let headFound = false;
-  	tree.nodes.forEach((node) => {
-			if(!headFound && (node.role=="Head"||node.role=="head")) {
+    tree.nodes.forEach((node) => {
+      if(!headFound && (node.role=="Head"||node.role=="head")) {
         head = findHead(node);
         headFound = true;
       } else if(headFound && node.role=="head") {
@@ -89,23 +89,23 @@ function findHead(tree) {
 }
 
 function findLeaves(tree, leaves) {
-	tree.nodes.forEach((node) => {
-  	if(typeof(node.nodes)=="string") { // leaf node
+  tree.nodes.forEach((node) => {
+    if(typeof(node.nodes)=="string") { // leaf node
       leaves.push({id:node.id, label:node.nodes});
     } else {
-     	findLeaves(node, leaves);
+      findLeaves(node, leaves);
     }
   });
 }
 
 function buildEdges(tree, edges) {
-	let head = null;
+  let head = null;
   let nonHeads = [];
   let headFound = false;
-	tree.nodes.forEach((node) => {
+  tree.nodes.forEach((node) => {
     // there can be only one head now
-  	if(!headFound && (node.role=="Head" || node.role=="head")) {
-    	head = findHead(node);
+    if(!headFound && (node.role=="Head" || node.role=="head")) {
+      head = findHead(node);
       headFound = true;
     } else {
       // head is more important than Head
@@ -117,17 +117,17 @@ function buildEdges(tree, edges) {
         nonHeads.push({head:findHead(node), label:node.role});  
       }
     }
-  	if(typeof(node.nodes)!="string") {
+    if(typeof(node.nodes)!="string") {
       buildEdges(node, edges);
     }
   });
 
   // add edges from head to nonheads
   nonHeads.forEach((item) => {
-  	var edgeObj = {from: head.id, to: item.head.id, arrows: "to", label: item.label};
+    var edgeObj = {from: head.id, to: item.head.id, arrows: "to", label: item.label};
     if(item.label=="Head" || item.label=="head") {
-    	edgeObj['arrows'] = '';
+      edgeObj['arrows'] = '';
     }
-  	edges.push(edgeObj);
+    edges.push(edgeObj);
   });
 }
