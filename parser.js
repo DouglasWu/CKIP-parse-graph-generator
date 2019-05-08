@@ -82,8 +82,12 @@ function findHead(tree) {
       } else if(headFound && node.role=="head") {
         // head is more important than Head
         head = findHead(node);
+        headFound = true;
       }
     });
+    if (!headFound) {
+      head = findHead(tree.nodes[tree.nodes.length - 1]);
+    }
   }
   return head;
 }
@@ -102,32 +106,27 @@ function buildEdges(tree, edges) {
   let head = null;
   let nonHeads = [];
   let headFound = false;
-  tree.nodes.forEach((node) => {
-    // there can be only one head now
-    if(!headFound && (node.role=="Head" || node.role=="head")) {
-      head = findHead(node);
-      headFound = true;
-    } else {
-      // head is more important than Head
-      if(node.role=="head" && headFound) {
-        head = findHead(node);
-        // push the Head into nonHeads
-        nonHeads.push({head:head, label:head.role});
-      } else {
-        nonHeads.push({head:findHead(node), label:node.role});  
+  
+  // if the tree has children
+  if(typeof(tree.nodes)!="string") {
+    
+    head = findHead(tree);
+    
+    tree.nodes.forEach((node) => {
+      nodeHead = findHead(node);
+      if (nodeHead.id != head.id) {
+        nonHeads.push({head: nodeHead, label:node.role});    
       }
-    }
-    if(typeof(node.nodes)!="string") {
       buildEdges(node, edges);
-    }
-  });
+    });
 
-  // add edges from head to nonheads
-  nonHeads.forEach((item) => {
-    var edgeObj = {from: head.id, to: item.head.id, arrows: "to", label: item.label};
-    if(item.label=="Head" || item.label=="head") {
-      edgeObj['arrows'] = '';
-    }
-    edges.push(edgeObj);
-  });
+    // add edges from head to nonheads
+    nonHeads.forEach((item) => {
+      var edgeObj = {from: head.id, to: item.head.id, arrows: "to", label: item.label};
+      if(item.label=="Head" || item.label=="head") {
+        edgeObj['arrows'] = '';
+      }
+      edges.push(edgeObj);
+    });
+  }
 }
